@@ -1,4 +1,4 @@
-import pygame, sys, random
+import pygame, sys, random, json
 from pygame.locals import *
 
 WINDOWWIDTH = 600
@@ -38,6 +38,23 @@ pygame.init()
 pygame.display.set_caption('T-REX')
 FPSCLOCK = pygame.time.Clock()
 DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+
+# Função para ler o HighScore do arquivo JSON
+def load_high_score():
+    try:
+        with open("highscore.json", "r") as f:
+            data = json.load(f)
+            return data.get("highscore", 0)
+    except FileNotFoundError:
+        return 0
+
+# Função para salvar o HighScore no arquivo JSON
+def save_high_score(score):
+    try:
+        with open("highscore.json", "w") as f:
+            json.dump({"highscore": score}, f)
+    except Exception as e:
+        print(f"Erro ao salvar o HighScore: {e}")
 
 class T_Rex():
     def __init__(self, option = 3):
@@ -238,7 +255,7 @@ class Sky():
 class Score():
     def __init__(self):
         self.score = 0
-        self.highScore = 0
+        self.highScore = load_high_score()  # Carregar o HighScore do arquivo JSON
         self.textScore = ""
         self.textHighScore = ""
         self.size = 15
@@ -247,6 +264,7 @@ class Score():
         self.score += 0.15
         if self.score > self.highScore:
             self.highScore = int(self.score)
+            save_high_score(self.highScore)  # Salvar o novo HighScore no arquivo JSON
 
         self.textScore = str(int(self.score))
         for i in range(5 - len(self.textScore)):
